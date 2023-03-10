@@ -1,0 +1,41 @@
+version: "3.9"
+services:
+
+  database:
+    container_name: database-server
+    image: mysql
+    volumes:
+      - /mysql_data:/var/lib/mysql
+    environment:
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: mysql
+      MYSQL_ROOT_PASSWORD: mysql
+      MYSQL_DATABASE: cloudstorage
+    ports:
+      - "3306:3306"
+
+  server:
+    container_name: backend-server
+    build: ./
+    image: cloudstorageback
+    environment:
+      spring_datasource_url: jdbc:mysql://database:3306/cloudstorage
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: mysql
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_LIQUIBASE_URL: jdbc:mysql://database:3306/cloudstorage
+      SPRING_LIQUIBASE_USER: root
+      SPRING_LIQUIBASE_PASSWORD: mysql
+    ports:
+      - "8090:8090"
+    depends_on:
+      - database
+
+  client:
+    container_name: frontend-client
+    build:
+      context: netology-diplom-frontend
+      dockerfile: Dockerfile
+    image: cloudstoragefront
+    ports:
+      - "8080:8080"
